@@ -6,23 +6,20 @@
     <title>Principal's Dashboard | Excellence Academy</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #006b3c; --danger: #c0392b; }
+        :root { --primary: #006b3c; --danger: #c0392b; --accent: #d35400; }
         body { font-family: 'Roboto', sans-serif; background: #f4f6f8; margin: 0; }
         #login-overlay { position: fixed; inset: 0; background: var(--primary); display: flex; justify-content: center; align-items: center; z-index: 100; }
         .login-box { background: white; padding: 40px; border-radius: 10px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .dashboard-container { max-width: 1000px; margin: 30px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .hidden { display: none !important; }
-        
-        /* Stats & Controls */
         .controls { display: flex; gap: 10px; margin-bottom: 20px; }
         input#search-input { flex-grow: 1; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .btn-excel { background: #1d6f42; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th { background: var(--primary); color: white; padding: 12px; text-align: left; }
         td { padding: 12px; border-bottom: 1px solid #ddd; }
         .stat-card { background: #e9f7ef; padding: 20px; border-radius: 8px; text-align: center; flex: 1; margin: 0 10px; }
         .stat-card h2 { margin: 0; color: var(--primary); font-size: 32px; }
-        
         .badge { padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: bold; }
         .pass { background: #d4edda; color: #155724; }
         .fail { background: #f8d7da; color: #721c24; }
@@ -41,7 +38,10 @@
     <div id="main-dash" class="dashboard-container hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid var(--primary); padding-bottom:15px; margin-bottom:20px;">
             <h1>📊 Student Submissions</h1>
-            <button onclick="loadData()" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer;">🔄 Refresh</button>
+            <div>
+                <button onclick="loadData()" style="background:var(--primary); color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer;">🔄 Refresh</button>
+                <button class="btn-excel" onclick="exportToExcel()">📥 Download Excel</button>
+            </div>
         </div>
 
         <div style="display:flex; margin-bottom:30px;">
@@ -64,6 +64,7 @@
     <script>
         const FIREBASE_URL = "https://excellencecbt-577fb-default-rtdb.firebaseio.com/results.json";
         let allResults = [];
+        let currentlyDisplayed = [];
 
         function checkLogin() {
             if(document.getElementById('pass').value === "admin123") {
@@ -76,20 +77,17 @@
         async function loadData() {
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Fetching cloud records...</td></tr>";
-
             try {
                 const response = await fetch(FIREBASE_URL);
                 const cloudData = await response.json();
-                
                 if (!cloudData) {
                     tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>No records found.</td></tr>";
-                    allResults = [];
+                    allResults = []; currentlyDisplayed = [];
                     return;
                 }
-
                 allResults = Object.keys(cloudData).map(key => cloudData[key]).reverse();
+                currentlyDisplayed = allResults;
                 renderTable(allResults);
-                
             } catch (e) {
                 tbody.innerHTML = "<tr><td colspan='6' style='color:red; text-align:center;'>Connection Error.</td></tr>";
             }
@@ -99,7 +97,6 @@
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = "";
             let totalPercent = 0;
-
             data.forEach(r => {
                 totalPercent += r.percent;
                 tbody.innerHTML += `<tr>
@@ -111,19 +108,34 @@
                     <td><span class="badge ${r.percent >= 50 ? 'pass' : 'fail'}">${r.percent >= 50 ? 'PASS' : 'FAIL'}</span></td>
                 </tr>`;
             });
-
             document.getElementById('t-count').innerText = data.length;
             document.getElementById('t-avg').innerText = data.length ? Math.round(totalPercent / data.length) + "%" : "0%";
         }
 
         function filterResults() {
             const query = document.getElementById('search-input').value.toLowerCase();
-            const filtered = allResults.filter(r => 
+            currentlyDisplayed = allResults.filter(r => 
                 r.name.toLowerCase().includes(query) || 
                 (r.class && r.class.toLowerCase().includes(query)) || 
                 r.subject.toLowerCase().includes(query)
             );
-            renderTable(filtered);
+            renderTable(currentlyDisplayed);
+        }
+
+        function exportToExcel() {
+            if (currentlyDisplayed.length === 0) return alert("No data to export");
+            let csvContent = "data:text/csv;charset=utf-8,Date,Name,Class,Subject,Score,Percentage,Status\n";
+            currentlyDisplayed.forEach(r => {
+                let status = r.percent >= 50 ? "PASS" : "FAIL";
+                csvContent += `${r.date},${r.name},${r.class},${r.subject.toUpperCase()},${r.score}/10,${r.percent}%,${status}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "Excellence_Academy_Results.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
