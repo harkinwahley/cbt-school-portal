@@ -14,13 +14,10 @@
         .btn { background-color: var(--primary); color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin: 5px; font-size: 16px; }
         .btn-subject { width: 100%; margin: 10px 0; padding: 15px; font-size: 18px; }
         #timer-box { background: var(--accent); color: white; padding: 10px; border-radius: 5px; margin-bottom: 20px; display: inline-block; font-weight: bold; }
-        
-        /* Question Styling */
         #q-text { text-align: left; margin-bottom: 20px; line-height: 1.5; color: #333; font-size: 1.1rem; }
         .option-label { display: flex; align-items: center; background: var(--secondary); padding: 15px; margin: 10px 0; border-radius: 8px; cursor: pointer; text-align: left; border: 1px solid #cce5d9; transition: 0.2s; }
         .option-label:hover { background: #d4efdf; }
         .option-label input { width: auto; margin: 0 15px 0 0; cursor: pointer; transform: scale(1.2); }
-        
         .hidden { display: none; }
         .nav-btns { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
         .admin-link { margin-top: 20px; font-size: 12px; color: #bbb; text-decoration: none; display: block; }
@@ -66,14 +63,13 @@
         <div style="font-size: 40px; color: var(--primary); margin: 20px 0;">
             Score: <span id="res-score"></span> / 10
         </div>
-        <p>Record uploaded to cloud successfully.</p>
+        <p>Your results have been securely uploaded to the cloud.</p>
         <button class="btn" onclick="location.reload()">Finish</button>
     </div>
 
     <script src="questions.js"></script>
     <script>
         const FIREBASE_URL = "https://excellencecbt-577fb-default-rtdb.firebaseio.com/results.json";
-        
         let currentUser = "", currentClass = "", currentSubject = "", currentQuestions = [], userAnswers = [], currentQIndex = 0, timerInterval;
 
         function switchSection(id) {
@@ -106,10 +102,8 @@
             const q = currentQuestions[index];
             document.getElementById('q-text').innerText = (index + 1) + ". " + q.question;
             document.getElementById('q-status').innerText = (index + 1) + " of 10";
-            
             const optsDiv = document.getElementById('options-container');
             optsDiv.innerHTML = '';
-            
             q.options.forEach((opt, i) => {
                 const label = document.createElement('label');
                 label.className = 'option-label';
@@ -117,7 +111,6 @@
                 label.onclick = () => { userAnswers[index] = i; };
                 optsDiv.appendChild(label);
             });
-            
             document.getElementById('btn-next').innerText = index === 9 ? "Submit Exam" : "Next";
         }
 
@@ -140,20 +133,8 @@
             clearInterval(timerInterval);
             let score = 0;
             currentQuestions.forEach((q, i) => { if(userAnswers[i] === q.answer) score++; });
-            
-            const resultData = { 
-                name: currentUser, 
-                class: currentClass,
-                subject: currentSubject, 
-                score: score, 
-                percent: score * 10, 
-                date: new Date().toLocaleString() 
-            };
-
-            try {
-                await fetch(FIREBASE_URL, { method: "POST", body: JSON.stringify(resultData) });
-            } catch (e) { console.error("Cloud save failed", e); }
-
+            const resultData = { name: currentUser, class: currentClass, subject: currentSubject, score: score, percent: score * 10, date: new Date().toLocaleString() };
+            try { await fetch(FIREBASE_URL, { method: "POST", body: JSON.stringify(resultData) }); } catch (e) { console.error("Error saving", e); }
             document.getElementById('res-name-display').innerText = currentUser + " (" + currentClass + ")";
             document.getElementById('res-score').innerText = score;
             switchSection('section-result');
