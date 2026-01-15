@@ -9,14 +9,20 @@
         :root { --primary: #006b3c; --danger: #c0392b; }
         body { font-family: 'Roboto', sans-serif; background: #f4f6f8; margin: 0; }
         #login-overlay { position: fixed; inset: 0; background: var(--primary); display: flex; justify-content: center; align-items: center; z-index: 100; }
-        .login-box { background: white; padding: 40px; border-radius: 10px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .login-box { background: white; padding: 40px; border-radius: 10px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .dashboard-container { max-width: 1000px; margin: 30px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .hidden { display: none !important; }
+        
+        /* Stats & Controls */
+        .controls { display: flex; gap: 10px; margin-bottom: 20px; }
+        input#search-input { flex-grow: 1; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
+        
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th { background: var(--primary); color: white; padding: 12px; text-align: left; }
         td { padding: 12px; border-bottom: 1px solid #ddd; }
         .stat-card { background: #e9f7ef; padding: 20px; border-radius: 8px; text-align: center; flex: 1; margin: 0 10px; }
         .stat-card h2 { margin: 0; color: var(--primary); font-size: 32px; }
+        
         .badge { padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: bold; }
         .pass { background: #d4edda; color: #155724; }
         .fail { background: #f8d7da; color: #721c24; }
@@ -26,35 +32,38 @@
 
     <div id="login-overlay">
         <div class="login-box">
-            <h2>🔐 Principal Access</h2>
-            <input type="password" id="pass" placeholder="Enter Password" style="padding:12px; width:250px; display:block; margin:20px auto; border:1px solid #ddd; border-radius:5px;">
-            <button onclick="checkLogin()" style="padding:12px 30px; background:var(--primary); color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">Login to Dashboard</button>
+            <h2>🔐 Principal's Dashboard</h2>
+            <input type="password" id="pass" placeholder="Enter Access Password" style="padding:12px; width:250px; display:block; margin:20px auto; border:1px solid #ddd; border-radius:5px;">
+            <button onclick="checkLogin()" style="padding:12px 30px; background:var(--primary); color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">Access Records</button>
         </div>
     </div>
 
     <div id="main-dash" class="dashboard-container hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid var(--primary); padding-bottom:15px; margin-bottom:20px;">
-            <h1>📊 Principal's Dashboard</h1>
-            <button onclick="location.reload()" style="background:#555; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer;">Refresh Data</button>
+            <h1>📊 Student Submissions</h1>
+            <button onclick="loadData()" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer;">🔄 Refresh</button>
         </div>
 
-        <div style="display:flex; justify-content: space-around; margin-bottom:30px;">
-            <div class="stat-card"><h2 id="t-count">0</h2><p>Total Attempts</p></div>
-            <div class="stat-card"><h2 id="t-avg">0%</h2><p>Average Score</p></div>
+        <div style="display:flex; margin-bottom:30px;">
+            <div class="stat-card"><h2 id="t-count">0</h2><p>Attempts</p></div>
+            <div class="stat-card"><h2 id="t-avg">0%</h2><p>Avg Score</p></div>
+        </div>
+
+        <div class="controls">
+            <input type="text" id="search-input" placeholder="Search by name, class, or subject..." onkeyup="filterResults()">
         </div>
 
         <table>
             <thead>
-                <tr><th>Date & Time</th><th>Student Name</th><th>Subject</th><th>Score</th><th>Status</th></tr>
+                <tr><th>Date</th><th>Name</th><th>Class</th><th>Subject</th><th>Score</th><th>Status</th></tr>
             </thead>
-            <tbody id="table-body">
-                <tr><td colspan="5" style="text-align:center;">No records available.</td></tr>
-            </tbody>
+            <tbody id="table-body"></tbody>
         </table>
     </div>
 
     <script>
         const FIREBASE_URL = "https://excellencecbt-577fb-default-rtdb.firebaseio.com/results.json";
+        let allResults = [];
 
         function checkLogin() {
             if(document.getElementById('pass').value === "admin123") {
@@ -66,38 +75,55 @@
 
         async function loadData() {
             const tbody = document.getElementById('table-body');
-            tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Loading Cloud Data...</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Fetching cloud records...</td></tr>";
 
             try {
                 const response = await fetch(FIREBASE_URL);
                 const cloudData = await response.json();
                 
                 if (!cloudData) {
-                    tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No students have submitted yet.</td></tr>";
+                    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>No records found.</td></tr>";
+                    allResults = [];
                     return;
                 }
 
-                const resultsArray = Object.keys(cloudData).map(key => cloudData[key]);
-                tbody.innerHTML = "";
-                let sum = 0;
-
-                [...resultsArray].reverse().forEach(r => {
-                    sum += r.percent;
-                    tbody.innerHTML += `<tr>
-                        <td>${r.date}</td>
-                        <td><b>${r.name}</b></td>
-                        <td>${r.subject.toUpperCase()}</td>
-                        <td>${r.score} / 10</td>
-                        <td><span class="badge ${r.percent >= 50 ? 'pass' : 'fail'}">${r.percent >= 50 ? 'PASS' : 'FAIL'}</span></td>
-                    </tr>`;
-                });
-
-                document.getElementById('t-count').innerText = resultsArray.length;
-                document.getElementById('t-avg').innerText = Math.round(sum / resultsArray.length) + "%";
-
-            } catch (error) {
-                tbody.innerHTML = "<tr><td colspan='5' style='color:red; text-align:center;'>Error: Check Internet Connection.</td></tr>";
+                allResults = Object.keys(cloudData).map(key => cloudData[key]).reverse();
+                renderTable(allResults);
+                
+            } catch (e) {
+                tbody.innerHTML = "<tr><td colspan='6' style='color:red; text-align:center;'>Connection Error.</td></tr>";
             }
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = "";
+            let totalPercent = 0;
+
+            data.forEach(r => {
+                totalPercent += r.percent;
+                tbody.innerHTML += `<tr>
+                    <td>${r.date}</td>
+                    <td><b>${r.name}</b></td>
+                    <td>${r.class || 'N/A'}</td>
+                    <td>${r.subject.toUpperCase()}</td>
+                    <td>${r.score} / 10</td>
+                    <td><span class="badge ${r.percent >= 50 ? 'pass' : 'fail'}">${r.percent >= 50 ? 'PASS' : 'FAIL'}</span></td>
+                </tr>`;
+            });
+
+            document.getElementById('t-count').innerText = data.length;
+            document.getElementById('t-avg').innerText = data.length ? Math.round(totalPercent / data.length) + "%" : "0%";
+        }
+
+        function filterResults() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filtered = allResults.filter(r => 
+                r.name.toLowerCase().includes(query) || 
+                (r.class && r.class.toLowerCase().includes(query)) || 
+                r.subject.toLowerCase().includes(query)
+            );
+            renderTable(filtered);
         }
     </script>
 </body>
