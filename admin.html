@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Principal's Dashboard</title>
+    <title>Principal's Dashboard | Excellence Academy</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #006b3c; --danger: #c0392b; }
         body { font-family: 'Roboto', sans-serif; background: #f4f6f8; margin: 0; }
         #login-overlay { position: fixed; inset: 0; background: var(--primary); display: flex; justify-content: center; align-items: center; z-index: 100; }
-        .login-box { background: white; padding: 40px; border-radius: 10px; text-align: center; }
-        .dashboard-container { max-width: 900px; margin: 30px auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .login-box { background: white; padding: 40px; border-radius: 10px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .dashboard-container { max-width: 1000px; margin: 30px auto; background: white; padding: 30px; border-radius: 10px; }
         .hidden { display: none !important; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th { background: var(--primary); color: white; padding: 12px; text-align: left; }
         td { padding: 12px; border-bottom: 1px solid #ddd; }
-        .stat-card { background: #e9f7ef; padding: 15px; border-radius: 8px; text-align: center; flex: 1; margin: 5px; }
-        .badge { padding: 4px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+        .stat-card { background: #e9f7ef; padding: 20px; border-radius: 8px; text-align: center; flex: 1; margin: 0 10px; }
+        .badge { padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: bold; }
         .pass { background: #d4edda; color: #155724; }
         .fail { background: #f8d7da; color: #721c24; }
     </style>
@@ -25,19 +25,19 @@
 
     <div id="login-overlay">
         <div class="login-box">
-            <h2>🔑 Staff Entrance</h2>
-            <input type="password" id="pass" placeholder="Password" style="padding:10px; width:200px; display:block; margin:10px auto;">
-            <button onclick="checkLogin()" style="padding:10px 20px; background:var(--primary); color:white; border:none; cursor:pointer;">Login</button>
+            <h2>🔐 Principal's Dashboard</h2>
+            <input type="password" id="pass" placeholder="Enter Access Password" style="padding:12px; width:250px; display:block; margin:20px auto; border:1px solid #ddd; border-radius:5px;">
+            <button onclick="checkLogin()" style="padding:12px 30px; background:var(--primary); color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">Access Records</button>
         </div>
     </div>
 
     <div id="main-dash" class="dashboard-container hidden">
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--primary); padding-bottom:10px;">
-            <h1>📊 Exam Records</h1>
-            <button onclick="clearData()" style="background:var(--danger); color:white; border:none; padding:8px; border-radius:4px; cursor:pointer;">Reset All</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid var(--primary); padding-bottom:15px; margin-bottom:20px;">
+            <h1>📊 Student Submissions</h1>
+            <button onclick="loadData()" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer;">🔄 Refresh Data</button>
         </div>
 
-        <div style="display:flex; margin:20px 0;">
+        <div style="display:flex; margin-bottom:30px;">
             <div class="stat-card"><h2 id="t-count">0</h2><p>Attempts</p></div>
             <div class="stat-card"><h2 id="t-avg">0%</h2><p>Avg Score</p></div>
         </div>
@@ -51,38 +51,49 @@
     </div>
 
     <script>
+        const FIREBASE_URL = "https://excellencecbt-577fb-default-rtdb.firebaseio.com/results.json";
+
         function checkLogin() {
             if(document.getElementById('pass').value === "admin123") {
                 document.getElementById('login-overlay').classList.add('hidden');
                 document.getElementById('main-dash').classList.remove('hidden');
                 loadData();
-            } else { alert("Wrong Password"); }
+            } else { alert("Incorrect Password"); }
         }
 
-        function loadData() {
-            const data = JSON.parse(localStorage.getItem('schoolResults') || "[]");
+        async function loadData() {
             const tbody = document.getElementById('table-body');
-            tbody.innerHTML = "";
-            
-            let sum = 0;
-            // Use [...data].reverse() to ensure we don't break the original array
-            [...data].reverse().forEach(r => {
-                sum += r.percent;
-                tbody.innerHTML += `<tr>
-                    <td>${r.date}</td>
-                    <td><b>${r.name}</b></td>
-                    <td>${r.subject}</td>
-                    <td>${r.score}/10</td>
-                    <td><span class="badge ${r.percent>=50?'pass':'fail'}">${r.percent>=50?'PASS':'FAIL'}</span></td>
-                </tr>`;
-            });
+            tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Fetching cloud records...</td></tr>";
 
-            document.getElementById('t-count').innerText = data.length;
-            document.getElementById('t-avg').innerText = data.length ? Math.round(sum/data.length) + "%" : "0%";
-        }
+            try {
+                const response = await fetch(FIREBASE_URL);
+                const cloudData = await response.json();
+                
+                tbody.innerHTML = "";
+                if (!cloudData) {
+                    tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No records found.</td></tr>";
+                    return;
+                }
 
-        function clearData() {
-            if(confirm("Delete all?")) { localStorage.removeItem('schoolResults'); loadData(); }
+                const results = Object.keys(cloudData).map(key => cloudData[key]);
+                let totalPercent = 0;
+
+                [...results].reverse().forEach(r => {
+                    totalPercent += r.percent;
+                    tbody.innerHTML += `<tr>
+                        <td>${r.date}</td>
+                        <td><b>${r.name}</b></td>
+                        <td>${r.subject.toUpperCase()}</td>
+                        <td>${r.score} / 10</td>
+                        <td><span class="badge ${r.percent >= 50 ? 'pass' : 'fail'}">${r.percent >= 50 ? 'PASS' : 'FAIL'}</span></td>
+                    </tr>`;
+                });
+
+                document.getElementById('t-count').innerText = results.length;
+                document.getElementById('t-avg').innerText = Math.round(totalPercent / results.length) + "%";
+            } catch (e) {
+                tbody.innerHTML = "<tr><td colspan='5' style='color:red; text-align:center;'>Connection Error.</td></tr>";
+            }
         }
     </script>
 </body>
