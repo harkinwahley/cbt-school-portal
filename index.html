@@ -15,6 +15,7 @@
         input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
         .btn { background-color: var(--primary); color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin: 5px; font-size: 16px; transition: 0.2s; }
         .btn:hover { opacity: 0.9; }
+        .btn:disabled { background-color: #95a5a6; cursor: not-allowed; opacity: 0.7; }
         .btn-subject { width: 100%; margin: 5px 0; padding: 15px; font-size: 16px; text-align: left; background: #fff; color: var(--text); border: 1px solid #ddd; border-radius: 8px; cursor: pointer; }
         .btn-subject:hover { background: var(--secondary); border-color: var(--primary); }
         .option-label { display: flex; align-items: center; background: var(--secondary); padding: 15px; margin: 10px 0; border-radius: 8px; cursor: pointer; text-align: left; border: 1px solid #cce5d9; }
@@ -36,8 +37,7 @@
 
     <div id="section-dashboard" class="container hidden">
         <h2 id="welcome-msg">Welcome</h2>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;" id="subject-grid">
-            </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;" id="subject-grid"></div>
     </div>
 
     <div id="section-exam" class="container hidden">
@@ -50,7 +50,7 @@
             <div id="options-container"></div>
         </div>
         <div class="nav-btns">
-            <button class="btn" style="background:#555" onclick="prevQuestion()">Back</button>
+            <button class="btn" id="btn-back" style="background:#555" onclick="prevQuestion()">Back</button>
             <div id="q-status" style="font-weight: bold;"></div>
             <button class="btn" id="btn-next" onclick="nextQuestion()">Next</button>
         </div>
@@ -72,9 +72,8 @@
     <script>
         let currentUser = {}, currentSubject = '', currentQuestions = [], userAnswers = [], currentQIndex = 0;
         let timerInterval, startTime, timeTakenSec;
+        const DB_URL = "https://excellencecbt-577fb-default-rtdb.firebaseio.com/results";
 
-        // Secret Admin Entrance
-        let tapCount = 0;
         function secretAdminTap() {
             tapCount++;
             if (tapCount === 5) { window.location.href = 'admin.html'; tapCount = 0; }
@@ -125,8 +124,15 @@
                         <span>${opt}</span>
                     </label>`;
             });
-            document.getElementById('btn-next').innerText = (idx === 19) ? "Submit" : "Next";
-            document.getElementById('btn-next').onclick = (idx === 19) ? submitExam : nextQuestion;
+
+            const nextBtn = document.getElementById('btn-next');
+            if (idx === 19) {
+                nextBtn.innerText = "Submit Exam";
+                nextBtn.onclick = submitExam;
+            } else {
+                nextBtn.innerText = "Next";
+                nextBtn.onclick = nextQuestion;
+            }
         }
 
         function saveAns(i) { userAnswers[currentQIndex] = i; }
@@ -138,11 +144,17 @@
             timerInterval = setInterval(() => {
                 let m = Math.floor(t / 60), s = t % 60;
                 document.getElementById('time-left').textContent = `${m}:${s < 10 ? '0'+s : s}`;
-                if (--t < 0) submitExam(); // AUTO SUBMIT
+                if (--t < 0) submitExam(); 
             }, 1000);
         }
 
         async function submitExam() {
+            const nextBtn = document.getElementById('btn-next');
+            
+            // 1. PREVENT MULTIPLE CLICKS
+            nextBtn.disabled = true;
+            nextBtn.innerText = "Processing...";
+
             clearInterval(timerInterval);
             timeTakenSec = Math.floor((Date.now() - startTime) / 1000);
             let score = 0, missed = [];
@@ -158,32 +170,44 @@
                 score: score,
                 percent: (score/20)*100,
                 timeTaken: formatTime(timeTakenSec),
-                date: new Date().toLocaleString()
+                date: new Date().toLocaleString(),
+                timestamp: Date.now()
             };
 
             try {
-                await fetch("https://excellencecbt-577fb-default-rtdb.firebaseio.com/results.json", {
+                // 2. SEND TO DATABASE
+                const response = await fetch(`${DB_URL}.json`, {
                     method: "POST",
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(resultData)
                 });
-            } catch(e) { console.warn("Sync failed"); }
 
-            document.getElementById('res-name').innerText = resultData.name;
-            document.getElementById('res-subject').innerText = resultData.subject.toUpperCase();
-            document.getElementById('res-score').innerText = score;
-            document.getElementById('res-percent').innerText = resultData.percent + "%";
-            
-            const fb = document.getElementById('feedback-box');
-            if(missed.length > 0) {
-                fb.classList.remove('hidden');
-                document.getElementById('topic-suggestions').innerHTML = missed.map(t => `<li>${t}</li>`).join('');
+                if(!response.ok) throw new Error("Sync failed");
+
+                // 3. SHOW RESULTS
+                document.getElementById('res-name').innerText = resultData.name;
+                document.getElementById('res-subject').innerText = resultData.subject.toUpperCase();
+                document.getElementById('res-score').innerText = score;
+                document.getElementById('res-percent').innerText = resultData.percent + "%";
+                
+                const fb = document.getElementById('feedback-box');
+                if(missed.length > 0) {
+                    fb.classList.remove('hidden');
+                    document.getElementById('topic-suggestions').innerHTML = missed.map(t => `<li>${t}</li>`).join('');
+                }
+                switchSection('section-result');
+
+            } catch(e) { 
+                console.warn(e); 
+                alert("❌ Network Error. Please try clicking submit again.");
+                // 4. RE-ENABLE IF FAILED
+                nextBtn.disabled = false;
+                nextBtn.innerText = "Submit Exam";
             }
-            switchSection('section-result');
         }
 
         function formatTime(s) {
-            let m = Math.floor(s/60);
-            let sec = s % 60;
+            let m = Math.floor(s/60), sec = s % 60;
             return `${m}m ${sec}s`;
         }
 
@@ -192,7 +216,7 @@
             document.getElementById(id).classList.remove('hidden');
         }
 
-        function shuffleArray(arr) { return arr.sort(() => Math.random() - 0.5); }
+        function shuffleArray(arr) { return [...arr].sort(() => Math.random() - 0.5); }
     </script>
 </body>
 </html>
