@@ -1,127 +1,134 @@
-// questions.js
 const questionBank = {
-    math: [
-      {
-        id: 1,
-        question: "If set A = {1, 3, 5, 7, 9} and set B = {2, 3, 5, 7}, what is A ∩ B?",
-        options: ["{1, 2, 9}", "{3, 5, 7}", "{1, 2, 3, 5, 7, 9}", "Ø"],
-        answer: 1 // Index of correct option (0 is A, 1 is B, 2 is C, 3 is D)
-      },
-      {
-        id: 2,
-        question: "Evaluate (81)^(-3/4)",
-        options: ["27", "1/27", "9", "1/9"],
-        answer: 1
-      },
-      {
-        id: 3,
-        question: "Solve for x in the equation: 3^(2x) = 27",
-        options: ["1", "1.5", "3", "4.5"],
-        answer: 1
-      },
-      {
-        id: 4,
-        question: "Find the simple interest on ₦40,000 for 3 years at 5% per annum.",
-        options: ["₦5,000", "₦6,000", "₦4,000", "₦8,000"],
-        answer: 1
-      },
-      {
-        id: 5,
-        question: "Convert 1101 base 2 to base 10.",
-        options: ["13", "11", "15", "12"],
-        answer: 0
-      },
-      {
-        id: 6,
-        question: "If y varies inversely as x, and y=4 when x=3, find y when x=6.",
-        options: ["2", "4", "6", "12"],
-        answer: 0
-      },
-      {
-        id: 7,
-        question: "Factorize completely: 2x² - 8",
-        options: ["2(x-2)(x+2)", "2(x-4)(x+1)", "(2x-4)(x+2)", "2(x-2)²"],
-        answer: 0
-      },
-      {
-        id: 8,
-        question: "The gradient of the line passing through points P(2, 5) and Q(4, 9) is:",
-        options: ["4", "3", "2", "1"],
-        answer: 2
-      },
-      {
-        id: 9,
-        question: "If tan θ = 3/4, find the value of sin θ (where θ is acute).",
-        options: ["3/5", "4/5", "3/7", "5/3"],
-        answer: 0
-      },
-      {
-        id: 10,
-        question: "Find the mean of the numbers: 2, 4, 6, 8, 10.",
-        options: ["4", "5", "6", "8"],
-        answer: 2
-      }
-    ],
-    english: [
-      {
-        id: 11,
-        question: "Choose the option nearest in meaning to: The man was 'vindicated' by the court.",
-        options: ["Condemned", "Accused", "Freed from blame", "Imprisoned"],
-        answer: 2
-      },
-      {
-        id: 12,
-        question: "Choose the option opposite in meaning to: The driver was 'reckless'.",
-        options: ["Careless", "Cautious", "Fast", "Drunk"],
-        answer: 1
-      },
-      {
-        id: 13,
-        question: "Which of the following words is correctly spelt?",
-        options: ["Embarassment", "Embarrassment", "Embarrasment", "Embarrassmant"],
-        answer: 1
-      },
-      {
-        id: 14,
-        question: "Complete: The boy ______ the book on the table yesterday.",
-        options: ["lay", "laid", "lied", "lain"],
-        answer: 1
-      },
-      {
-        id: 15,
-        question: "Nearest in meaning: It was a 'futile' attempt to escape.",
-        options: ["Successful", "Dangerous", "Useless", "Clever"],
-        answer: 2
-      },
-      {
-        id: 16,
-        question: "Which word rhymes with 'Hair'?",
-        options: ["Here", "Hear", "Air", "Her"],
-        answer: 2
-      },
-      {
-        id: 17,
-        question: "Complete: Neither of the boys ______ present at the party.",
-        options: ["were", "was", "are", "have been"],
-        answer: 1
-      },
-      {
-        id: 18,
-        question: "'He has a finger in every pie.' This means he...",
-        options: ["Loves eating", "Is a baker", "Is involved in many activities", "Injured his finger"],
-        answer: 2
-      },
-      {
-        id: 19,
-        question: "Opposite in meaning: The atmosphere was 'hostile'.",
-        options: ["Friendly", "Aggressive", "Warm", "Harsh"],
-        answer: 0
-      },
-      {
-        id: 20,
-        question: "Complete: If I ______ you, I would accept the offer.",
-        options: ["am", "was", "were", "be"],
-        answer: 2
-      }
-    ]
-  };
+  math: [
+    { id: 1, question: "If set A = {1, 3, 5, 7, 9} and set B = {2, 3, 5, 7}, what is A ∩ B?", options: ["{1, 2, 9}", "{3, 5, 7}", "{1, 2, 3, 5, 7, 9}", "Ø"], answer: 1 },
+    { id: 2, question: "Evaluate (81)^(-3/4)", options: ["27", "1/27", "9", "1/9"], answer: 1 },
+    { id: 3, question: "Solve for x in the equation: 3^(2x) = 27", options: ["1", "1.5", "3", "4.5"], answer: 1 },
+    { id: 4, question: "Find the simple interest on ₦40,000 for 3 years at 5% per annum.", options: ["₦5,000", "₦6,000", "₦4,000", "₦8,000"], answer: 1 },
+    { id: 5, question: "Convert 1101 base 2 to base 10.", options: ["13", "11", "15", "12"], answer: 0 },
+    { id: 6, question: "If y varies inversely as x, and y=4 when x=3, find y when x=6.", options: ["2", "4", "6", "12"], answer: 0 },
+    { id: 7, question: "Factorize completely: 2x² - 8", options: ["2(x-2)(x+2)", "2(x-4)(x+1)", "(2x-4)(x+2)", "2(x-2)²"], answer: 0 },
+    { id: 8, question: "The gradient of the line passing through points P(2, 5) and Q(4, 9) is:", options: ["4", "3", "2", "1"], answer: 2 },
+    { id: 9, question: "If tan θ = 3/4, find the value of sin θ (where θ is acute).", options: ["3/5", "4/5", "3/7", "5/3"], answer: 0 },
+    { id: 10, question: "Find the mean of the numbers: 2, 4, 6, 8, 10.", options: ["4", "5", "6", "8"], answer: 2 }
+  ],
+  english: [
+    { id: 11, question: "Choose the option nearest in meaning to: The man was 'vindicated' by the court.", options: ["Condemned", "Accused", "Freed from blame", "Imprisoned"], answer: 2 },
+    { id: 12, question: "Choose the option opposite in meaning to: The driver was 'reckless'.", options: ["Careless", "Cautious", "Fast", "Drunk"], answer: 1 },
+    { id: 13, question: "Which of the following words is correctly spelt?", options: ["Embarassment", "Embarrassment", "Embarrasment", "Embarrassmant"], answer: 1 },
+    { id: 14, question: "Complete: The boy ______ the book on the table yesterday.", options: ["lay", "laid", "lied", "lain"], answer: 1 },
+    { id: 15, question: "Nearest in meaning: It was a 'futile' attempt to escape.", options: ["Successful", "Dangerous", "Useless", "Clever"], answer: 2 },
+    { id: 16, question: "Which word rhymes with 'Hair'?", options: ["Here", "Hear", "Air", "Her"], answer: 2 },
+    { id: 17, question: "Complete: Neither of the boys ______ present at the party.", options: ["were", "was", "are", "have been"], answer: 1 },
+    { id: 18, question: "'He has a finger in every pie.' This means he...", options: ["Loves eating", "Is a baker", "Is involved in many activities", "Injured his finger"], answer: 2 },
+    { id: 19, question: "Opposite in meaning: The atmosphere was 'hostile'.", options: ["Friendly", "Aggressive", "Warm", "Harsh"], answer: 0 },
+    { id: 20, question: "Complete: If I ______ you, I would accept the offer.", options: ["am", "was", "were", "be"], answer: 2 }
+  ],
+  physics: [
+    { id: 21, question: "Which of the following is a derived unit?", options: ["Kilogram", "Metre", "Newton", "Second"], answer: 2 },
+    { id: 22, question: "The property of a body to resist change in its state of rest is?", options: ["Momentum", "Inertia", "Force", "Velocity"], answer: 1 },
+    { id: 23, question: "The heat from the sun reaches the earth by?", options: ["Conduction", "Convection", "Radiation", "Absorption"], answer: 2 },
+    { id: 24, question: "A mirror that always forms a virtual, erect and diminished image is?", options: ["Plane", "Concave", "Convex", "Cylindrical"], answer: 2 },
+    { id: 25, question: "The unit of electric capacitance is?", options: ["Ohm", "Farad", "Henry", "Tesla"], answer: 1 },
+    { id: 26, question: "Sound travels fastest in?", options: ["Air", "Water", "Steel", "Vacuum"], answer: 2 },
+    { id: 27, question: "The process whereby a liquid turns to gas at its surface is?", options: ["Boiling", "Evaporation", "Sublimation", "Melting"], answer: 1 },
+    { id: 28, question: "Which instrument measures atmospheric pressure?", options: ["Hydrometer", "Hygrometer", "Barometer", "Thermometer"], answer: 2 },
+    { id: 29, question: "The color of light with the longest wavelength is?", options: ["Blue", "Green", "Yellow", "Red"], answer: 3 },
+    { id: 30, question: "Upthrust is equal to the weight of the fluid displaced. This is?", options: ["Hooke's Law", "Archimedes' Principle", "Newton's Law", "Boyle's Law"], answer: 1 }
+  ],
+  chemistry: [
+    { id: 31, question: "The most abundant gas in the atmosphere is?", options: ["Oxygen", "Nitrogen", "Argon", "Carbon Dioxide"], answer: 1 },
+    { id: 32, question: "The PH of a neutral solution at 25°C is?", options: ["0", "5", "7", "14"], answer: 2 },
+    { id: 33, question: "Atomic number is the number of ______ in an atom.", options: ["Neutrons", "Electrons", "Protons", "Nucleons"], answer: 2 },
+    { id: 34, question: "The process of iron rusting is an example of?", options: ["Reduction", "Oxidation", "Decomposition", "Neutralization"], answer: 1 },
+    { id: 35, question: "Which of these is a noble gas?", options: ["Chlorine", "Neon", "Hydrogen", "Nitrogen"], answer: 1 },
+    { id: 36, question: "The shape of a water molecule is?", options: ["Linear", "V-shaped", "Tetrahedral", "Pyramidal"], answer: 1 },
+    { id: 37, question: "Which acid is found in vinegar?", options: ["Citric acid", "Ethanoic acid", "Lactic acid", "Hydrochloric acid"], answer: 1 },
+    { id: 38, question: "The separation of a mixture of liquids with different boiling points is?", options: ["Filtration", "Distillation", "Evaporation", "Decantation"], answer: 1 },
+    { id: 39, question: "Temporary hardness of water is caused by?", options: ["CaSO4", "Ca(HCO3)2", "MgSO4", "NaCl"], answer: 1 },
+    { id: 40, question: "The negative electrode in an electrolytic cell is the?", options: ["Anode", "Cathode", "Voltameter", "Electrolyte"], answer: 1 }
+  ],
+  biology: [
+    { id: 41, question: "The 'powerhouse' of the cell is the?", options: ["Nucleus", "Ribosome", "Mitochondrion", "Vacuole"], answer: 2 },
+    { id: 42, question: "Which blood group is known as the universal recipient?", options: ["Group O", "Group A", "Group B", "Group AB"], answer: 3 },
+    { id: 43, question: "The process of maintaining a constant internal environment is?", options: ["Osmosis", "Excretion", "Homeostasis", "Respiration"], answer: 2 },
+    { id: 44, question: "Which vitamin is essential for blood clotting?", options: ["Vitamin A", "Vitamin C", "Vitamin D", "Vitamin K"], answer: 3 },
+    { id: 45, question: "The movement of water through a semi-permeable membrane is?", options: ["Diffusion", "Osmosis", "Transpiration", "Active transport"], answer: 1 },
+    { id: 46, question: "Pollination by wind is called?", options: ["Anemophily", "Entomophily", "Hydrophily", "Zoophily"], answer: 0 },
+    { id: 47, question: "The respiratory organ in insects is the?", options: ["Lungs", "Gills", "Trachea", "Skin"], answer: 2 },
+    { id: 48, question: "A plant that lives for more than two years is a?", options: ["Annual", "Biennial", "Perennial", "Ephemeral"], answer: 2 },
+    { id: 49, question: "The functional unit of the kidney is the?", options: ["Neuron", "Nephron", "Alveolus", "Villi"], answer: 1 },
+    { id: 50, question: "Which hormone regulates sugar level in the blood?", options: ["Adrenaline", "Insulin", "Thyroxine", "Auxin"], answer: 1 }
+  ],
+  commerce: [
+    { id: 51, question: "The exchange of goods for goods is known as?", options: ["Trade", "Barter", "Commerce", "Buying"], answer: 1 },
+    { id: 52, question: "Which of the following is an aid to trade?", options: ["Fishing", "Mining", "Insurance", "Farming"], answer: 2 },
+    { id: 53, question: "A wholesaler sells goods in small quantities to the?", options: ["Consumer", "Retailer", "Producer", "Manufacturer"], answer: 1 },
+    { id: 54, question: "A document used to acknowledge the receipt of goods is a?", options: ["Invoice", "Credit note", "Delivery note", "Debit note"], answer: 2 },
+    { id: 55, question: "The capital of a company divided into small units is?", options: ["Profit", "Interest", "Shares", "Debentures"], answer: 2 },
+    { id: 56, question: "Branding is mainly used for?", options: ["Production", "Identification", "Storage", "Pricing"], answer: 1 },
+    { id: 57, question: "A business owned by 2 to 20 people is a?", options: ["Sole proprietorship", "Partnership", "Public Company", "Co-operative"], answer: 1 },
+    { id: 58, question: "The first link in the channel of distribution is?", options: ["Wholesaler", "Consumer", "Retailer", "Producer"], answer: 3 },
+    { id: 59, question: "The main aim of a commercial bank is to?", options: ["Issue currency", "Make profit", "Formulate laws", "Collect taxes"], answer: 1 },
+    { id: 60, question: "Commerce is divided into Trade and ______?", options: ["Industry", "Aids to trade", "Direct services", "Production"], answer: 1 }
+  ],
+  accounting: [
+    { id: 61, question: "The accounting equation is expressed as?", options: ["Assets = Capital - Liabilities", "Assets = Capital + Liabilities", "Capital = Assets + Liabilities", "Liabilities = Assets + Capital"], answer: 1 },
+    { id: 62, question: "Which book of account is used for daily transactions?", options: ["Ledger", "Journal", "Trial Balance", "Balance Sheet"], answer: 1 },
+    { id: 63, question: "A person who owes money to a business is a?", options: ["Creditor", "Debtor", "Owner", "Shareholder"], answer: 1 },
+    { id: 64, question: "Fixed assets include which of the following?", options: ["Cash", "Stock", "Machinery", "Debtors"], answer: 2 },
+    { id: 65, question: "The double entry for cash sales is debit cash and credit ______?", options: ["Purchases", "Bank", "Sales", "Debtor"], answer: 2 },
+    { id: 66, question: "Trial balance is prepared to test ______?", options: ["Net profit", "Total assets", "Arithmetical accuracy", "Cash at bank"], answer: 2 },
+    { id: 67, question: "Net profit is calculated in the?", options: ["Trading account", "Profit and loss account", "Balance sheet", "Cash book"], answer: 1 },
+    { id: 68, question: "Bad debt is an example of an ______?", options: ["Asset", "Income", "Expense", "Liability"], answer: 2 },
+    { id: 69, question: "The Petty Cash Book uses the ______ system.", options: ["Double entry", "Imprest", "Single entry", "Accrual"], answer: 1 },
+    { id: 70, question: "A credit balance in the cash book indicates a?", options: ["Profit", "Loss", "Bank overdraft", "Cash in hand"], answer: 2 }
+  ],
+  government: [
+    { id: 71, question: "The ultimate power in a state is called?", options: ["Authority", "Influence", "Sovereignty", "Legitimacy"], answer: 2 },
+    { id: 72, question: "A system of government with two houses of legislature is?", options: ["Unicameral", "Bicameral", "Federal", "Unitary"], answer: 1 },
+    { id: 73, question: "The organ of government that interprets laws is the?", options: ["Legislature", "Executive", "Judiciary", "Press"], answer: 2 },
+    { id: 74, question: "Nigeria's first Prime Minister was?", options: ["Nnamdi Azikiwe", "Abubakar Tafawa Balewa", "Obafemi Awolowo", "Ahmadu Bello"], answer: 1 },
+    { id: 75, question: "The right to vote is also known as?", options: ["Franchise", "Plebiscite", "Referendum", "Diplomacy"], answer: 0 },
+    { id: 76, question: "The highest court in Nigeria is the?", options: ["High Court", "Court of Appeal", "Supreme Court", "Customary Court"], answer: 2 },
+    { id: 77, question: "Democracy originated from?", options: ["Rome", "Greece", "Britain", "USA"], answer: 1 },
+    { id: 78, question: "The rule of law means ______?", options: ["Lawyers are supreme", "No one is above the law", "The President is above the law", "Laws are for the poor"], answer: 1 },
+    { id: 79, question: "Nigeria became a Republic in?", options: ["1960", "1963", "1979", "1999"], answer: 1 },
+    { id: 80, question: "Who is the 'father of Nigerian nationalism'?", options: ["Herbert Macaulay", "Obafemi Awolowo", "Nnamdi Azikiwe", "Ahmadu Bello"], answer: 0 }
+  ],
+  literature: [
+    { id: 81, question: "A play meant to make people laugh is a?", options: ["Tragedy", "Comedy", "Tragi-comedy", "Farce"], answer: 1 },
+    { id: 82, question: "A poem of fourteen lines is a?", options: ["Ode", "Elegy", "Sonnet", "Epic"], answer: 2 },
+    { id: 83, question: "Comparison using 'as' or 'like' is a?", options: ["Metaphor", "Simile", "Oxymoron", "Hyperbole"], answer: 1 },
+    { id: 84, question: "The main character in a play is the?", options: ["Antagonist", "Protagonist", "Villain", "Narrator"], answer: 1 },
+    { id: 85, question: "A story about a person's life written by another person is a?", options: ["Autobiography", "Biography", "Anthology", "Fiction"], answer: 1 },
+    { id: 86, question: "Giving human qualities to non-living things is?", options: ["Simile", "Hyperbole", "Personification", "Irony"], answer: 2 },
+    { id: 87, question: "The time and place of a story is the?", options: ["Plot", "Setting", "Climax", "Theme"], answer: 1 },
+    { id: 88, question: "Who wrote 'Things Fall Apart'?", options: ["Wole Soyinka", "Chinua Achebe", "Flora Nwapa", "Buchi Emecheta"], answer: 1 },
+    { id: 89, question: "A poem mourning the dead is an?", options: ["Ode", "Elegy", "Lyric", "Ballad"], answer: 1 },
+    { id: 90, question: "Words that sound like what they represent (e.g., 'buzz') use?", options: ["Assonance", "Alliteration", "Onomatopoeia", "Pun"], answer: 2 }
+  ],
+  economics: [
+    { id: 91, question: "The basic economic problem of all societies is?", options: ["Inflation", "Unemployment", "Scarcity", "Poverty"], answer: 2 },
+    { id: 92, question: "Opportunity cost is the ______ foregone.", options: ["Money", "Alternative", "Next best alternative", "Price"], answer: 2 },
+    { id: 93, question: "The reward for land as a factor of production is?", options: ["Interest", "Profit", "Rent", "Wages"], answer: 2 },
+    { id: 94, question: "When demand increases and supply remains constant, price will?", options: ["Fall", "Stay the same", "Rise", "Fluctuate"], answer: 2 },
+    { id: 95, question: "Utility in economics means?", options: ["Usefulness", "Satisfaction", "Consumption", "Availability"], answer: 1 },
+    { id: 96, question: "Human wants are?", options: ["Limited", "Insatiable", "Few", "Static"], answer: 1 },
+    { id: 97, question: "A market with only one seller is a?", options: ["Duopoly", "Monopoly", "Oligopoly", "Perfect market"], answer: 1 },
+    { id: 98, question: "Inflation is the persistent ______ in the general price level.", options: ["Fall", "Rise", "Stability", "Fluctuation"], answer: 1 },
+    { id: 99, question: "The formula for Total Cost is?", options: ["FC + VC", "FC - VC", "FC / VC", "Price x Quantity"], answer: 0 },
+    { id: 100, question: "The movement of people from rural areas to cities is?", options: ["Migration", "Urbanization", "Immigration", "Emigration"], answer: 1 }
+  ],
+  crs: [
+    { id: 101, question: "How many days did it take God to create the world?", options: ["5", "6", "7", "8"], answer: 1 },
+    { id: 102, question: "Who was the father of the faithful?", options: ["Moses", "Abraham", "David", "Isaac"], answer: 1 },
+    { id: 103, question: "The first murder in the Bible was committed by?", options: ["Adam", "Cain", "Abel", "Seth"], answer: 1 },
+    { id: 104, question: "The Israelites were in bondage in Egypt for ______ years.", options: ["40", "100", "400", "430"], answer: 3 },
+    { id: 105, question: "Who was swallowed by a big fish?", options: ["Peter", "Jonah", "Paul", "Noah"], answer: 1 },
+    { id: 106, question: "Where was Jesus born?", options: ["Nazareth", "Jerusalem", "Bethlehem", "Galilee"], answer: 2 },
+    { id: 107, question: "The first king of Israel was?", options: ["David", "Saul", "Solomon", "Samuel"], answer: 1 },
+    { id: 108, question: "Who was the strongest man in the Bible?", options: ["Samson", "David", "Goliath", "Solomon"], answer: 0 },
+    { id: 109, question: "Who betrayed Jesus?", options: ["Peter", "John", "Judas Iscariot", "Thomas"], answer: 2 },
+    { id: 110, question: "The first book of the Bible is?", options: ["Exodus", "Matthew", "Genesis", "Revelation"], answer: 2 }
+  ]
+};
