@@ -34,12 +34,26 @@
         <a href="admin.html" class="admin-link">Staff Login</a>
     </div>
 
-    <div id="section-dashboard" class="container hidden">
-        <h2 id="welcome-msg">Welcome</h2>
-        <p>Choose your subject to begin:</p>
+   <div id="section-dashboard" class="container hidden">
+    <h2 id="welcome-msg">Welcome</h2>
+    <p>Select a subject to begin practice:</p>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <button class="btn btn-subject" onclick="startExam('physics')">⚛️ Physics</button>
+        <button class="btn btn-subject" onclick="startExam('chemistry')">🧪 Chemistry</button>
+        <button class="btn btn-subject" onclick="startExam('biology')">🧬 Biology</button>
         <button class="btn btn-subject" onclick="startExam('math')">🧮 Mathematics</button>
-        <button class="btn btn-subject" onclick="startExam('english')">📖 English Language</button>
+
+        <button class="btn btn-subject" onclick="startExam('english')">📖 English</button>
+        <button class="btn btn-subject" onclick="startExam('literature')">📚 Literature</button>
+        <button class="btn btn-subject" onclick="startExam('government')">🏛️ Government</button>
+        <button class="btn btn-subject" onclick="startExam('crs')">✝️ CRS</button>
+
+        <button class="btn btn-subject" onclick="startExam('economics')">📈 Economics</button>
+        <button class="btn btn-subject" onclick="startExam('commerce')">🛒 Commerce</button>
+        <button class="btn btn-subject" onclick="startExam('accounting')">💰 Accounting</button>
     </div>
+</div>
 
     <div id="section-exam" class="container hidden">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
