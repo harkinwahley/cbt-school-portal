@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Excellence Academy</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #006b3c; --danger: #c0392b; --bg: #f4f6f8; }
         body { font-family: 'Roboto', sans-serif; background: var(--bg); margin: 0; }
         #login-overlay { position: fixed; inset: 0; background: var(--primary); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .login-box { background: white; padding: 40px; border-radius: 12px; text-align: center; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .login-box { background: white; padding: 40px; border-radius: 12px; text-align: center; width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .dashboard-container { max-width: 1100px; margin: 30px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .hidden { display: none !important; }
         header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); padding-bottom: 15px; margin-bottom: 20px; }
@@ -19,20 +22,18 @@
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
         th { background: #f8f9fa; font-weight: bold; }
-        .badge { padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: bold; }
-        .pass { background: #d4edda; color: #155724; }
-        .fail { background: #f8d7da; color: #721c24; }
         .btn { padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .btn:hover { opacity: 0.8; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
     <div id="login-overlay">
         <div class="login-box">
-            <h2 style="margin-top:0;">Admin Access</h2>
-            <input type="password" id="pass" placeholder="Enter Password" style="width:100%; padding:12px; margin:15px 0; border:1px solid #ddd; border-radius:5px; box-sizing:border-box;">
-            <button onclick="checkLogin()" class="btn" style="background:var(--primary); color:white; width:100%;">Unlock Records</button>
+            <h2 style="margin-top:0;">Secure Admin Login</h2>
+            <input type="email" id="email" placeholder="Admin Email">
+            <input type="password" id="pass" placeholder="Password">
+            <button onclick="login()" id="login-btn" class="btn" style="background:var(--primary); color:white; width:100%;">Sign In</button>
         </div>
     </div>
 
@@ -43,6 +44,7 @@
                 <button onclick="loadData()" class="btn" style="background:#555; color:white;">🔄 Refresh</button>
                 <button onclick="exportCSV()" class="btn" style="background:#1d6f42; color:white;">📥 Export CSV</button>
                 <button onclick="resetDatabase()" class="btn" style="background:var(--danger); color:white;">🔥 Clear All</button>
+                <button onclick="logout()" class="btn" style="background:#333; color:white; margin-left:10px;">Exit</button>
             </div>
         </header>
 
@@ -52,7 +54,7 @@
         </div>
 
         <div style="overflow-x: auto;">
-            <table>
+            <table id="resultsTable">
                 <thead>
                     <tr>
                         <th>Date</th>
@@ -60,9 +62,8 @@
                         <th>Class</th>
                         <th>Subject</th>
                         <th>Score (/20)</th>
-                        <th>Time Taken</th>
                         <th>Status</th>
-                        <th>Delete</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="table-body"></tbody>
@@ -71,87 +72,92 @@
     </div>
 
     <script>
-        const DB_URL = "https://excellencecbt-577fb-default-rtdb.firebaseio.com/results";
-        let results = [];
+        // 1. YOUR FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyAIn1jTUAVLNpHbbEs-INzBDzSUdoTu1cE",
+            databaseURL: "https://excellencecbt-577fb-default-rtdb.firebaseio.com",
+            projectId: "excellencecbt-577fb",
+        };
 
-        function checkLogin() {
-            if(document.getElementById('pass').value === "admin123") {
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // 2. LOGIN FUNCTION
+        async function login() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+            const btn = document.getElementById('login-btn');
+
+            btn.disabled = true;
+            btn.innerText = "Authenticating...";
+
+            try {
+                await auth.signInWithEmailAndPassword(email, pass);
                 document.getElementById('login-overlay').classList.add('hidden');
                 document.getElementById('main-dash').classList.remove('hidden');
                 loadData();
-            } else { alert("Incorrect Access Password"); }
+            } catch (error) {
+                alert("Login Failed: " + error.message);
+                btn.disabled = false;
+                btn.innerText = "Sign In";
+            }
         }
 
-        async function loadData() {
-            try {
-                const res = await fetch(`${DB_URL}.json`);
-                const data = await res.json();
-                const tbody = document.getElementById('table-body');
+        // 3. LOAD DATA (USING SDK)
+        function loadData() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = "<tr><td colspan='7'>Loading records...</td></tr>";
+
+            db.ref('results').once('value', (snapshot) => {
+                const data = snapshot.val();
                 tbody.innerHTML = "";
                 
-                if(!data || Object.keys(data).length === 0) {
-                    tbody.innerHTML = "<tr><td colspan='8' style='text-align:center;'>No records found. Portal is fresh.</td></tr>";
-                    document.getElementById('t-count').innerText = "0";
-                    document.getElementById('t-avg').innerText = "0%";
+                if (!data) {
+                    tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;'>No records found.</td></tr>";
                     return;
                 }
 
-                results = Object.keys(data).map(k => ({id: k, ...data[k]})).reverse();
-                
+                let results = Object.keys(data).map(k => ({id: k, ...data[k]})).reverse();
                 let totalPct = 0;
+
                 results.forEach(r => {
                     totalPct += (r.percent || 0);
-                    const statusClass = (r.percent || 0) >= 50 ? 'pass' : 'fail';
+                    const status = (r.percent >= 50) ? "PASS" : "FAIL";
+                    const color = (r.percent >= 50) ? "#d4edda" : "#f8d7da";
+                    
                     tbody.innerHTML += `<tr>
                         <td><small>${r.date}</small></td>
                         <td><b>${r.name}</b></td>
                         <td>${r.class}</td>
                         <td>${r.subject.toUpperCase()}</td>
                         <td>${r.score} / 20</td>
-                        <td>${r.timeTaken || '---'}</td>
-                        <td><span class="badge ${statusClass}">${(r.percent || 0) >= 50 ? 'PASS' : 'FAIL'}</span></td>
-                        <td><button onclick="delRecord('${r.id}')" style="background:none; border:none; cursor:pointer; font-size:18px;">🗑️</button></td>
+                        <td><span style="background:${color}; padding:4px 8px; border-radius:4px;">${status}</span></td>
+                        <td><button onclick="delRecord('${r.id}')">🗑️</button></td>
                     </tr>`;
                 });
+
                 document.getElementById('t-count').innerText = results.length;
                 document.getElementById('t-avg').innerText = Math.round(totalPct/results.length) + "%";
-            } catch(e) { alert("Error connecting to database."); }
+            });
         }
 
         async function delRecord(id) {
-            if(confirm("Permanently delete this student record?")) {
-                await fetch(`${DB_URL}/${id}.json`, { method: 'DELETE' });
+            if(confirm("Delete record?")) {
+                await db.ref(`results/${id}`).remove();
                 loadData();
             }
         }
 
         async function resetDatabase() {
-            const check = prompt("Type 'CLEAR' to permanently delete ALL records from the database:");
-            if(check === "CLEAR") {
-                try {
-                    await fetch(`${DB_URL}.json`, { method: 'DELETE' });
-                    alert("Database has been reset. All records cleared.");
-                    loadData();
-                } catch(e) {
-                    alert("Failed to clear database.");
-                }
-            } else {
-                alert("Action cancelled.");
+            if(prompt("Type 'DELETE' to wipe all data") === "DELETE") {
+                await db.ref('results').remove();
+                loadData();
             }
         }
 
-        function exportCSV() {
-            if(results.length === 0) { alert("No data to export!"); return; }
-            let csv = "Date,Name,Class,Subject,Score,Percentage,Time Taken,Status\n";
-            results.forEach(r => {
-                csv += `${r.date},${r.name},${r.class},${r.subject.toUpperCase()},${r.score}/20,${r.percent}%,${r.timeTaken},${(r.percent||0)>=50?'PASS':'FAIL'}\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('href', url);
-            a.setAttribute('download', `Excellence_Academy_Full_Report.csv`);
-            a.click();
+        function logout() {
+            auth.signOut().then(() => location.reload());
         }
     </script>
 </body>
